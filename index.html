@@ -5,21 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="normalize.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.min.css">
   <title>eShop</title>
 </head>
 <body>
   <div class="wrapper">
     <header>
       <div class="menu container">
-        <button class="cart-button" type="button">Корзина</button>
+        <div class="price">
+          <div class="price-total"></div>
+        </div>
+        <button onclick="basket.render();"class="cart-button" type="button">Корзина</button>
       </div>
     </header>
     <main>
       <div class="goods-list"></div>
     </main>
     <footer>
-        <a href="https://github.com/GaleArt" target="_blank">
+        <a href="https://github.com/GaleArt/2-2-Advanced-JS" target="_blank">
         <svg enable-background="new 0 0 32 32"
         height="64px" version="1.1" viewBox="0 0 32 32" width="64px"
         xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
