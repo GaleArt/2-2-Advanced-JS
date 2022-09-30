@@ -15,7 +15,8 @@
         <div class="price">
           <div class="price-total"></div>
         </div>
-        <button onclick="basket.render();"class="cart-button" type="button">Корзина</button>
+        <button onclick="basket.fetchBasket(() => {basket.render();basket.calculatePrice();});" 
+          class="cart-button" type="button">Корзина</button>
       </div>
     </header>
     <main>
