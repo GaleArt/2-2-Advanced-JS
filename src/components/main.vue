@@ -59,7 +59,7 @@ export default {
       if (window.XMLHttpRequest) {
         xhr = new XMLHttpRequest();
       } else if (window.ActiveXObject) {
-        // xhr = new ActiveXObject('Microsoft.XMLHTTP');
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
       }
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
