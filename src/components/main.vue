@@ -69,13 +69,13 @@ export default {
       xhr.open('GET', '', true);
       xhr.send();
     },
-    //   fetchGoods(callback) {
-    // makeGETRequest('', (goods) => {
-    //       this.goods = JSON.parse(goods);
-    //       this.filteredGoods = JSON.parse(goods);
-    //       callback();
-    //     });
-    //   }
+      fetchGoods(callback) {
+        makeGETRequest('https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/catalogData.json', (goods) => {
+          this.goods = JSON.parse(goods);
+          this.filteredGoods = JSON.parse(goods);
+          callback();
+        });
+      }
   },
   computed: {
     filterGoods() {
