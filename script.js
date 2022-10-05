@@ -1,103 +1,133 @@
-// Lesson #2
+// Lesson #3
+
+const API_URL =
+	'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
+
+// 1. Переделайте makeGETRequest() так, чтобы она использовала промисы.
+function makeGETRequest(url, callback) {
+	var xhr;
+	if (window.XMLHttpRequest) {
+		xhr = new XMLHttpRequest();
+	} else if (window.ActiveXObject) {
+		xhr = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			callback(xhr.responseText);
+		}
+	};
+	xhr.open('GET', url, true);
+	xhr.send();
+}
+
 class GoodsItem {
-	constructor(title, price) {
-		this.title = title;
+	constructor(product_name, price) {
+		this.product_name = product_name;
 		this.price = price;
 	}
 	render() {
 		return `<div class="goods-item">
     		<div class="picture"></div>
-    		<h3>${this.title}</h3>
-    		<p>${this.price}</p>
-    		<button class="add-btn">Добавить</button>
+    		<h3>${this.product_name}</h3>
+    		<p>${this.price} руб.</p>
+    		<button onclick="basket.addBasket();" class="add-btn">Добавить</button>
     		</div>`;
 	}
 }
-
+// 3. * Переделайте GoodsList так, чтобы fetchGoods() возвращал промис, а render() вызывался в
+// обработчике этого промиса.
 class GoodsList {
 	constructor() {
 		this.goods = [];
 	}
-	fetchGoods() {
-		this.goods = [
-			{ title: 'Shirt', price: 150 },
-			{ title: 'Socks', price: 50 },
-			{ title: 'Jacket', price: 350 },
-			{ title: 'Shoes', price: 250 },
-			{ title: 'T-shirt', price: 180 },
-			{ title: 'Vest', price: 400 },
-			{ title: 'Shorts', price: 250 },
-			{ title: 'Skirt', price: 320 },
-			{ title: 'Coat', price: 600 },
-			{ title: 'Raincoat', price: 480 },
-			{ title: 'Stockings', price: 240 },
-			{ title: 'Sweatshirt', price: 350 },
-		];
+	fetchGoods(callback) {
+		makeGETRequest(`${API_URL}/catalogData.json`, (goods) => {
+			this.goods = JSON.parse(goods);
+			callback();
+		});
 	}
 	render() {
 		let listHtml = '';
 		this.goods.forEach((good) => {
-			const goodItem = new GoodsItem(good.title, good.price);
+			const goodItem = new GoodsItem(good.product_name, good.price);
 			listHtml += goodItem.render();
 		});
 		document.querySelector('.goods-list').innerHTML = listHtml;
 	}
 }
 
-// 1. Добавление классов для корзины и элемента корзины (по сути идентично общей странице)
 class BasketItem {
-	constructor(title, price) {
-		this.title = title;
+	constructor(product_name, price, quantity) {
+		this.product_name = product_name;
 		this.price = price;
+		this.quantity = quantity;
 	}
 	render() {
-		// Для проверки пока используется тот же рендер
 		return `<div class="goods-item">
     		<div class="picture"></div>
-    		<h3>${this.title}</h3>
-    		<p>${this.price}</p>
-    		<button class="add-btn">Удалить</button>
+    		<h3>${this.product_name}</h3>
+    		<p>${this.price} руб.</p>
+			<div class="quantity">${this.quantity} шт.
+				<button onclick="basket.delBasket();" class="del-btn">Удалить</button></div>
     		</div>`;
 	}
 }
 
 class Basket {
 	constructor() {
-		this.chooses = [];
+		this.carts = [];
 	}
-	// Предполагаем, что выбранные элементы тоже будут храниться на сервере
-	fetchBasket() {
-		this.chooses = [
-			{ title: 'Test #1', price: 150 },
-			{ title: 'Test #2', price: 50 },
-		];
-	}
-	// Место для добавление и удаление элемента из корзины:
-	addBasket() {}
-	delBasket() {}
-	// Для удаления отображаемых элементов страницы и рендера массива корзины
-	render() {
-		let basketHtml = '';
-		this.chooses.forEach((choose) => {
-			const chooseItem = new BasketItem(choose.title, choose.price);
-			basketHtml += chooseItem.render();
+	fetchBasket(callback) {
+		makeGETRequest(`${API_URL}/getBasket.json`, (carts) => {
+			this.carts = JSON.parse(carts);
+			callback();
 		});
-		document.querySelector('.goods-list').innerHTML = basketHtml; // передается в тот же div
 	}
-	// 2. Добавление метода суммарной стоимости (но уже для корзины):
+	// 2. Добавьте в соответствующие классы методы добавления товара в корзину, удаления товара из
+	// корзины и получения списка товаров корзины.
+	// Добавление в корзину:
+	addBasket() {
+		makeGETRequest(`${API_URL}/addToBasket.json`, (result) => {
+			result = JSON.parse(result);
+			console.log(`Добавлено ${result.result} элементов`);
+		});
+	}
+
+	// Удаление из корзины:
+	delBasket() {
+		makeGETRequest(`${API_URL}/deleteFromBasket.json`, (result) => {
+			result = JSON.parse(result);
+			console.log(`Удалено ${result.result} элементов`);
+		});
+	}
+
+	// Список товаров корзины + подсчет суммы:
+	render() {
+		let cartHtml = '';
+		this.carts.contents.forEach((cart) => {
+			const cartItem = new BasketItem(
+				cart.product_name,
+				cart.price,
+				cart.quantity
+			);
+			cartHtml += cartItem.render();
+		});
+		document.querySelector('.goods-list').innerHTML = cartHtml;
+	}
+	// Считалка корзины. Можно сделать глобально, чтобы до того как заходишь в корзину была видна сумма
 	calculatePrice() {
-		const priceList = this.chooses.reduce((total, choose) => {
-			return total + choose.price;
+		const priceList = this.carts.contents.reduce((total, cart) => {
+			return total + cart.price;
 		}, 0);
 		document.querySelector(
 			'.price-total'
-		).innerHTML = `<div class='price-title'>В корзине: </div>${priceList} $ `;
+		).innerHTML = `<div class='price-title'>В корзине: </div>${priceList} руб `;
 	}
 }
 
 const list = new GoodsList();
-list.fetchGoods();
-list.render();
+list.fetchGoods(() => {
+	list.render();
+});
+
 const basket = new Basket();
-basket.fetchBasket();
-basket.calculatePrice(); // обработкой на кнопку не понравилось :)
